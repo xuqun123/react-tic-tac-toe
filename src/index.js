@@ -47,29 +47,24 @@ function Square(props) {
 class Board extends React.Component {
   renderSquare(i) {
     return <Square 
+              key={i}
               value={this.props.squares[i]}
               onClick={() => this.props.onClick(i)}
             />;
   }
 
   render() {
+    let rows = [];
+    for(let i = 0; i < 3; i++) {
+      let squares = [];
+      for(let j = 0; j < 3; j++) {
+        squares.push(this.renderSquare(i * 3 + j));
+      }
+      rows.push(<div key={i} className="board-row">{squares}</div>);
+    }
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {rows}
       </div>
     );
   }
@@ -81,7 +76,8 @@ class Game extends React.Component {
 
     this.state = {
       history: [{ 
-        squares: Array(9).fill(null)
+        squares: Array(9).fill(null),
+        index: null
       }],
       xIsNext: true,
       stepNumber: 0
@@ -99,6 +95,7 @@ class Game extends React.Component {
     this.setState({
       history: history.concat([{
         squares: squares,
+        index: i
       }]),
       xIsNext: !this.state.xIsNext,
       stepNumber: history.length
@@ -118,12 +115,10 @@ class Game extends React.Component {
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
+      const desc = move ? 'Go to move #' + move + ": [" + [Math.floor(step.index / 3) + 1, step.index % 3 + 1] + "]": 'Go to game start';
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button style={{fontWeight: this.state.stepNumber === move ? 'bold' : 'normal'}} onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
       );
     });    
